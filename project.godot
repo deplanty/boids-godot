@@ -18,9 +18,17 @@ config/icon="res://icon.png"
 
 Screen="*res://singletons/screen.gd"
 
+[global]
+
+layer=false
+
 [gui]
 
 common/drop_mouse_on_gui_input_disabled=true
+
+[layer_names]
+
+2d_physics/layer_1="Boids"
 
 [physics]
 
