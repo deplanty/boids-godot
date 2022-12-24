@@ -18,5 +18,3 @@ func add_boids(n=1):
 		boid.set_random_position(Screen.width, Screen.height)
 		boid.id = " ".join(["Boid", i])
 		boids_list.add_child(boid)
-		
-		print(boid.id, boid.position)
