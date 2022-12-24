@@ -2,12 +2,23 @@ extends KinematicBody2D
 
 # Boid parameters
 var id : String = ""
-export (Vector2) var speed := Vector2(5000, 0)  # pixel/???
+# Actual speed of the boid with direction
+export (Vector2) var speed := Vector2(100, 0)  # pixel/???
+# The target speed
+export (int) var speed_target := 5000  # pixel/???
+# The acceleration rate to the target speed
+export (float, 0.01, 1) var speed_target_rate := 0.7  # %
+# The radius where the boid can detect other boids
 export (int) var detection_radius := 80  # pixel
-export (float, 0.01, 0.99) var protection_radius := 0.3  # %
-export (float, 0.01, 0.99) var separation := 0.5  # %
-export (float, 0.01, 0.99) var aligment := 0.5  # %
-export (float, 0.01, 0.99) var cohesion := 0.5  # %
+# The percent of the detection radius used as the protective radius
+# The boid tries to get away from those in this range
+export (float, 0.01, 1) var protection_radius := 0.3  # %
+# Rate at which the boid get away from the others
+export (float, 0.01, 1) var separation := 0.5  # %
+# Rate at which the boid align with the others
+export (float, 0.01, 1) var aligment := 0.5  # %
+# Rate at which the boid stay close to the others
+export (float, 0.01, 1) var cohesion := 0.5  # %
 # Scenes and objects
 onready var detection_area = $Area2D
 
@@ -20,13 +31,18 @@ func _ready() -> void:
 
 func _process(delta) -> void:
 	
-	var boids = detection_area.get_overlapping_bodies()
+	# Detect boids in protection radius and go far from them
 	var closed_delta = Vector2(0, 0)
 	for boid in get_boids_in_protection():
 		closed_delta.x += position.x - boid.position.x
 		closed_delta.y += position.y - boid.position.y
-	
 	speed += closed_delta * separation
+	
+	# Adapt speed to match the target speed
+	var speed_magnitude = speed.length()
+	speed *= 1 + ((speed_target - speed_magnitude) / speed_magnitude) * speed_target_rate * delta
+	
+	# Move the boids according to the calculated speed
 	move_and_slide(speed * delta)
 	look_at(position + speed)
 	
