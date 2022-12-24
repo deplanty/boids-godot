@@ -16,7 +16,7 @@ export (float, 0.01, 1) var protection_radius := 0.3  # %
 # Rate at which the boid get away from the others
 export (float, 0.01, 1) var separation := 0.5  # %
 # Rate at which the boid align with the others
-export (float, 0.01, 1) var aligment := 0.5  # %
+export (float, 0.01, 1) var alignment := 0.5  # %
 # Rate at which the boid stay close to the others
 export (float, 0.01, 1) var cohesion := 0.5  # %
 # Scenes and objects
@@ -51,14 +51,14 @@ func _process(delta) -> void:
 
 # Methods
 
-func set_random_position(width:int, height:int) -> void:
-	var pad = 5
+## Set a random position and rotation to the boid within a range.
+func set_random_position(width:int, height:int, pad:int=5) -> void:
 	position.x = rand_range(pad, width - pad)
 	position.y = rand_range(pad, height - pad)
 	rotation = deg2rad(rand_range(0, 360))
 	speed.rotated(rotation)
 
-
+## Make the boid move in the board as if it is a donut.
 func world_is_a_donut():
 	if position.x > Screen.width:
 		position.x = 0
@@ -70,11 +70,17 @@ func world_is_a_donut():
 	elif position.y < 0:
 		position.y = Screen.height
 
-
+## Returns the list of boids contained in the protection area
 func get_boids_in_protection() -> Array:
 	var radius = detection_radius * protection_radius
 	$Area2D/CollisionShape2D.shape.radius = radius
 	var bodies = detection_area.get_overlapping_bodies()
 	bodies.erase(self)
 	$Area2D/CollisionShape2D.shape.radius = detection_radius
+	return bodies
+
+## Returns the list of boids conained in the detection area
+func get_boids_detected() -> Array:
+	var bodies = detection_area.get_overlapping_bodies()
+	bodies.erase(self)
 	return bodies
