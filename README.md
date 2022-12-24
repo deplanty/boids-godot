@@ -11,3 +11,7 @@ Boids respects 3 elementary rules:
 - Separation: steer to avoid crowding local flockmates
 - Alignment: steer towards the average heading of local flockmates
 - Cohesion: steer to move towards the average position (center of mass) of local flockmates
+
+## Sources
+
+https://vanhunteradams.com/Pico/Animal_Movement/Boids-algorithm.html
