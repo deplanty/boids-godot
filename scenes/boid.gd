@@ -8,12 +8,6 @@ export (Vector2) var speed := Vector2(100, 0)  # pixel/???
 export (int) var speed_target := 8000  # pixel/???
 # The acceleration rate to the target speed
 export (float, 0.01, 1) var speed_target_rate := 0.8  # %
-# Rate at which the boid get away from the others
-export (float, 0.01, 1) var separation := 0.8  # %
-# Rate at which the boid align with the others
-export (float, 0.01, 1) var alignment := 0.8  # %
-# Rate at which the boid stay close to the others
-export (float, 0.01, 1) var cohesion := 0.8  # %
 # Scenes and objects
 onready var detection_area = $DetectionArea
 onready var protection_area = $ProtectionArea
@@ -47,9 +41,9 @@ func _process(delta) -> void:
 		vel_average /= boids.size()
 		pos_average /= boids.size()
 	
-	speed += closed_delta * 200 * separation * delta  # Separation
-	speed += vel_average * 2 * alignment * delta  # Alignment
-	speed += (pos_average - position) * 20 * cohesion * delta  # Cohesion
+	speed += closed_delta * 200 * delta * Flock.separation  # Separation
+	speed += vel_average * 2 * delta * Flock.alignment  # Alignment
+	speed += (pos_average - position) * 20 * delta * Flock.cohesion  # Cohesion
 	
 	# Adapt speed to match the target speed
 	var speed_magnitude = speed.length()

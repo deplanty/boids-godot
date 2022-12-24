@@ -1,5 +1,13 @@
 extends Node
 
+var quantity :int = 100
+
+## Rate at which the boid get away from the others
+var separation :float = 0.8
+## Rate at which the boid align with the others
+var alignment :float = 0.8
+## Rate at which the boid stay close to the others
+var cohesion :float = 0.8
 
 var _id_current :int = 0
 
