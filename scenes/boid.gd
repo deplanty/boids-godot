@@ -1,46 +1,59 @@
 extends KinematicBody2D
 
 # Boid parameters
-var id : String = ""
+var id :int = 0
 # Actual speed of the boid with direction
 export (Vector2) var speed := Vector2(100, 0)  # pixel/???
 # The target speed
-export (int) var speed_target := 5000  # pixel/???
+export (int) var speed_target := 8000  # pixel/???
 # The acceleration rate to the target speed
-export (float, 0.01, 1) var speed_target_rate := 0.7  # %
-# The radius where the boid can detect other boids
-export (int) var detection_radius := 80  # pixel
-# The percent of the detection radius used as the protective radius
-# The boid tries to get away from those in this range
-export (float, 0.01, 1) var protection_radius := 0.3  # %
+export (float, 0.01, 1) var speed_target_rate := 0.8  # %
 # Rate at which the boid get away from the others
-export (float, 0.01, 1) var separation := 0.5  # %
+export (float, 0.01, 1) var separation := 0.8  # %
 # Rate at which the boid align with the others
-export (float, 0.01, 1) var alignment := 0.5  # %
+export (float, 0.01, 1) var alignment := 0.8  # %
 # Rate at which the boid stay close to the others
-export (float, 0.01, 1) var cohesion := 0.5  # %
+export (float, 0.01, 1) var cohesion := 0.8  # %
 # Scenes and objects
-onready var detection_area = $Area2D
+onready var detection_area = $DetectionArea
+onready var protection_area = $ProtectionArea
 
 # Magics
 
 func _ready() -> void:
 	randomize()
-	$Area2D/CollisionShape2D.shape.radius = detection_radius
+	id = Flock.next_id()
+	speed = speed.rotated(rotation)
 
 
 func _process(delta) -> void:
+	var boids :Array
 	
-	# Detect boids in protection radius and go far from them
+	# Detect boids in protection range and go far from them
 	var closed_delta = Vector2(0, 0)
-	for boid in get_boids_in_protection():
+	boids = get_boids_in_protection()
+	for boid in boids:
 		closed_delta.x += position.x - boid.position.x
 		closed_delta.y += position.y - boid.position.y
-	speed += closed_delta * separation
+	
+	# Detect boids in visual range, match their direction and move toward them
+	var vel_average = Vector2(0, 0)
+	var pos_average = Vector2(0, 0)
+	boids = get_boids_detected()
+	for boid in boids:
+		vel_average += boid.speed
+		pos_average += boid.position
+	if boids.size() > 0:
+		vel_average /= boids.size()
+		pos_average /= boids.size()
+	
+	speed += closed_delta * 200 * separation * delta  # Separation
+	speed += vel_average * 2 * alignment * delta  # Alignment
+	speed += (pos_average - position) * 20 * cohesion * delta  # Cohesion
 	
 	# Adapt speed to match the target speed
 	var speed_magnitude = speed.length()
-	speed *= 1 + ((speed_target - speed_magnitude) / speed_magnitude) * speed_target_rate * delta
+	speed *= 1 + ((speed_target - speed_magnitude) / speed_magnitude) * speed_target_rate
 	
 	# Move the boids according to the calculated speed
 	move_and_slide(speed * delta)
@@ -56,7 +69,7 @@ func set_random_position(width:int, height:int, pad:int=5) -> void:
 	position.x = rand_range(pad, width - pad)
 	position.y = rand_range(pad, height - pad)
 	rotation = deg2rad(rand_range(0, 360))
-	speed.rotated(rotation)
+	speed = speed.rotated(rotation)
 
 ## Make the boid move in the board as if it is a donut.
 func world_is_a_donut():
@@ -72,11 +85,8 @@ func world_is_a_donut():
 
 ## Returns the list of boids contained in the protection area
 func get_boids_in_protection() -> Array:
-	var radius = detection_radius * protection_radius
-	$Area2D/CollisionShape2D.shape.radius = radius
-	var bodies = detection_area.get_overlapping_bodies()
+	var bodies = protection_area.get_overlapping_bodies()
 	bodies.erase(self)
-	$Area2D/CollisionShape2D.shape.radius = detection_radius
 	return bodies
 
 ## Returns the list of boids conained in the detection area

@@ -17,6 +17,7 @@ config/icon="res://icon.png"
 [autoload]
 
 Screen="*res://singletons/screen.gd"
+Flock="*res://singletons/flock.gd"
 
 [global]
 
