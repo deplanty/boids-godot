@@ -8,7 +8,6 @@ export (int) var quantity :int = 50
 
 
 func _ready():
-	print("Board ready")
 	add_boids(quantity)
 
 
