@@ -1,3 +1,6 @@
+# Exports
+target/
+
 
 # Godot-specific ignores
 .import/
