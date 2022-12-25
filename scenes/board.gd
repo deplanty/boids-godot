@@ -4,6 +4,13 @@ extends Node2D
 var boid_scene = preload("res://scenes/boid.tscn")
 onready var boids_list = $Boids
 
+enum STATE {
+	RUN,
+	PAUSE,
+}
+var state_pause = STATE.PAUSE
+
+
 func _ready():
 	add_boids(Flock.quantity)
 	
@@ -14,6 +21,11 @@ func _ready():
 	$Control/GridContainer/Separation.value = Flock.separation * 100
 	$Control/GridContainer/Alignment.value = Flock.alignment * 100
 	$Control/GridContainer/Cohesion.value = Flock.cohesion * 100
+
+
+func _process(delta):
+	if Input.is_action_pressed("pause_space"):
+		toggle_pause()
 
 # Signals
 
@@ -33,9 +45,22 @@ func _on_Cohesion_value_changed(value):
 
 # Methods
 
-func add_boids(n=1):
+func add_boids(n=1) -> void:
 	for i in n:
 		var boid = boid_scene.instance()
 		boid.set_random_position(Screen.width, Screen.height)
 		boid.id = " ".join(["Boid", i])
 		boids_list.add_child(boid)
+
+
+func toggle_pause() -> void:
+	var state :bool
+	if state_pause == STATE.RUN:
+		state_pause = STATE.PAUSE
+		state = false
+	elif state_pause == STATE.PAUSE:
+		state_pause = STATE.RUN
+		state = true
+		
+	for boid in $Boids.get_children():
+		boid.set_process(state)

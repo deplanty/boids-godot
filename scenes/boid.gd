@@ -54,7 +54,7 @@ func _process(delta) -> void:
 	if obst.size() > 0:
 		close_obs /= obst.size()
 	
-	speed += close_obs * 400 * delta
+#	speed += close_obs * 400 * delta
 	
 	# Adapt speed to match the target speed
 #	var speed_magnitude = speed.length()
