@@ -3,11 +3,11 @@ extends KinematicBody2D
 # Boid parameters
 var id :int = 0
 # Actual speed of the boid with direction
-export (Vector2) var speed := Vector2(100, 0)  # pixel/???
+export (Vector2) var speed := Vector2(1000, 0)  # pixel/???
 # The target speed
-export (int) var speed_target := 8000  # pixel/???
+export (int) var speed_target := 1000  # pixel/???
 # The acceleration rate to the target speed
-export (float, 0.01, 1) var speed_target_rate := 0.8  # %
+export (float, 0.01, 1) var speed_target_rate := 1  # %
 # Scenes and objects
 onready var detection_area = $DetectionArea
 onready var protection_area = $ProtectionArea
@@ -27,8 +27,9 @@ func _process(delta) -> void:
 	var closed_delta = Vector2(0, 0)
 	boids = get_boids_in_protection()
 	for boid in boids:
-		closed_delta.x += position.x - boid.position.x
-		closed_delta.y += position.y - boid.position.y
+		closed_delta += position - boid.position
+	if boids.size() > 0:
+		closed_delta /= boids.size()
 	
 	# Detect boids in visual range, match their direction and move toward them
 	var vel_average = Vector2(0, 0)
@@ -41,13 +42,24 @@ func _process(delta) -> void:
 		vel_average /= boids.size()
 		pos_average /= boids.size()
 	
-	speed += closed_delta * 200 * delta * Flock.separation  # Separation
+	speed += closed_delta * 100 * delta * Flock.separation  # Separation
 	speed += vel_average * 2 * delta * Flock.alignment  # Alignment
 	speed += (pos_average - position) * 20 * delta * Flock.cohesion  # Cohesion
 	
+	# Avoid obstacles like walls
+	var obst = get_obstacles_detected()
+	var close_obs = Vector2(0, 0)
+	for obs in obst:
+		close_obs += position - obs.position
+	if obst.size() > 0:
+		close_obs /= obst.size()
+	
+	speed += close_obs * 400 * delta
+	
 	# Adapt speed to match the target speed
-	var speed_magnitude = speed.length()
-	speed *= 1 + ((speed_target - speed_magnitude) / speed_magnitude) * speed_target_rate
+#	var speed_magnitude = speed.length()
+	speed = speed.normalized() * speed_target
+#	speed *= 1 + ((speed_target - speed_magnitude) / speed_magnitude) * speed_target_rate
 	
 	# Move the boids according to the calculated speed
 	move_and_slide(speed * delta)
@@ -80,11 +92,25 @@ func world_is_a_donut():
 ## Returns the list of boids contained in the protection area
 func get_boids_in_protection() -> Array:
 	var bodies = protection_area.get_overlapping_bodies()
+	for body in bodies:
+		if body.get_collision_layer() != 1:
+			bodies.erase(body)
 	bodies.erase(self)
 	return bodies
 
 ## Returns the list of boids conained in the detection area
 func get_boids_detected() -> Array:
 	var bodies = detection_area.get_overlapping_bodies()
+	for body in bodies:
+		if body.get_collision_layer() != 1:
+			bodies.erase(body)
 	bodies.erase(self)
+	return bodies
+
+
+func get_obstacles_detected() -> Array:
+	var bodies = detection_area.get_overlapping_bodies()
+	for body in bodies:
+		if body.get_collision_layer() != 2:
+			bodies.erase(body)
 	return bodies

@@ -1,6 +1,6 @@
 extends Node
 
-var quantity :int = 100
+var quantity :int = 200
 
 ## Rate at which the boid get away from the others
 var separation :float = 0.8

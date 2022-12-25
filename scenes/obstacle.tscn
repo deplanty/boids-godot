@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=2]
+
+[sub_resource type="CircleShape2D" id=1]
+radius = 20.0
+
+[node name="Obstacle" type="StaticBody2D"]
+collision_layer = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource( 1 )
+
+[node name="Polygon2D" type="Polygon2D" parent="."]
+color = Color( 0.752941, 0.25098, 0.25098, 1 )
+polygon = PoolVector2Array( 0, -20, 10, -17, 17, -10, 20, 0, 17, 10, 10, 17, 0, 20, -10, 17, -17, 10, -20, 0, -17, -10, -10, -17 )

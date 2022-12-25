@@ -12,12 +12,18 @@ config_version=4
 
 config/name="Boids"
 run/main_scene="res://scenes/board.tscn"
+run/low_processor_mode=true
 config/icon="res://icon.png"
 
 [autoload]
 
 Screen="*res://singletons/screen.gd"
 Flock="*res://singletons/flock.gd"
+
+[debug]
+
+settings/fps/force_fps=60
+settings/stdout/print_fps=true
 
 [global]
 
@@ -30,6 +36,7 @@ common/drop_mouse_on_gui_input_disabled=true
 [layer_names]
 
 2d_physics/layer_1="Boids"
+2d_physics/layer_2="Obstacle"
 
 [physics]
 
